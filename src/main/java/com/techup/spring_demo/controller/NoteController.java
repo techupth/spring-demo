@@ -1,29 +1,53 @@
 package com.techup.spring_demo.controller;
 
-import com.techup.spring_demo.entity.Note;          // ใช้เป็นโครงสร้างข้อมูล (Entity)
-import com.techup.spring_demo.service.NoteService;  // เรียก business logic จาก Service
-import lombok.RequiredArgsConstructor;              // Lombok ช่วยสร้าง constructor ให้เอง
-import org.springframework.web.bind.annotation.*;   // ใช้สำหรับ REST API (เช่น @GetMapping)
-import java.util.List;                              // สำหรับเก็บข้อมูลหลาย record
+import com.techup.spring_demo.dto.NoteRequest;
+import com.techup.spring_demo.dto.NoteResponse;
+import com.techup.spring_demo.service.NoteService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@RestController // ✅ บอก Spring ว่าคลาสนี้จะ return JSON (เหมือน express.js ที่ส่ง res.json)
-@RequestMapping("/api/notes") // ✅ ตั้ง path หลักสำหรับ endpoint ทั้งหมดในคลาสนี้
-@RequiredArgsConstructor // ✅ ให้ Spring สร้าง constructor และ inject NoteService ให้อัตโนมัติ
+import java.net.URI;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/notes")
+@RequiredArgsConstructor
 public class NoteController {
 
-  // ✅ final = เหมือน const ใน JS (ค่าคงที่ เปลี่ยน object reference ไม่ได้)
   private final NoteService noteService;
 
-  // 🧩 GET /api/notes → ดึง Note ทั้งหมด
+  // GET /api/notes → 200
   @GetMapping
-  public List<Note> getNotes() {
-    return noteService.getAll(); // ✅ เรียก service ไปดึงข้อมูลจาก DB
+  public ResponseEntity<List<NoteResponse>> getNotes() {
+    return ResponseEntity.ok(noteService.getAll());
   }
 
-  // 🧱 POST /api/notes → สร้าง Note ใหม่
+  // GET /api/notes/{id} → 200 | 404
+  @GetMapping("/{id}")
+  public ResponseEntity<NoteResponse> getNote(@PathVariable Long id) {
+    return ResponseEntity.ok(noteService.getById(id));
+  }
+
+  // POST /api/notes → 201 + Location header
   @PostMapping
-  public Note createNote(@RequestBody Note note) {
-    // ✅ Spring จะ map JSON body → Note object ให้อัตโนมัติ
-    return noteService.create(note); // ส่งต่อให้ service บันทึกลง DB
+  public ResponseEntity<NoteResponse> create(@RequestBody NoteRequest req) {
+    NoteResponse created = noteService.create(req);
+    URI location = URI.create("/api/notes/" + created.getId());
+    return ResponseEntity.created(location).body(created);
+  }
+
+  // PUT /api/notes/{id} → 200 | 404
+  @PutMapping("/{id}")
+  public ResponseEntity<NoteResponse> update(@PathVariable Long id,
+                                             @RequestBody NoteRequest req) {
+    return ResponseEntity.ok(noteService.update(id, req));
+  }
+
+  // DELETE /api/notes/{id} → 204
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> delete(@PathVariable Long id) {
+    noteService.delete(id);
+    return ResponseEntity.noContent().build();
   }
 }
