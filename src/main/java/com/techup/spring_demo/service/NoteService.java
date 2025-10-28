@@ -13,6 +13,9 @@ import java.util.List;
 import com.techup.spring_demo.dto.NoteRequest;
 import com.techup.spring_demo.dto.NoteResponse;
 
+import com.techup.spring_demo.service.SupabaseStorageService;
+import org.springframework.web.multipart.MultipartFile;
+
 @Service
 @RequiredArgsConstructor 
 public class NoteService {
@@ -61,6 +64,15 @@ public class NoteService {
     Note existing = noteRepository.findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found"));
     noteRepository.delete(existing);
+  }
+
+  public NoteResponse attachFileUrl(Long id, String url) {
+  Note note = noteRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found"));
+
+    note.setImageUrl(url);
+    Note saved = noteRepository.save(note);
+    return toResponse(saved);
   }
 
 

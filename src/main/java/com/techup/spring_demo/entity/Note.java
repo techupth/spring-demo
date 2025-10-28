@@ -19,4 +19,7 @@ public class Note {
   
   @Column(columnDefinition = "TEXT")
   private String content;
+
+  @Column(name = "image_url")
+  private String imageUrl;
 }

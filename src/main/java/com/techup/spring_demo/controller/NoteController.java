@@ -6,9 +6,12 @@ import com.techup.spring_demo.service.NoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.List;
+
+import com.techup.spring_demo.service.SupabaseStorageService;
 
 @RestController
 @RequestMapping("/api/notes")
@@ -16,6 +19,8 @@ import java.util.List;
 public class NoteController {
 
   private final NoteService noteService;
+  private final SupabaseStorageService supabaseStorageService; // ✅ ฉีด service อัปโหลดเข้ามา
+
 
   // GET /api/notes → 200
   @GetMapping
@@ -49,5 +54,14 @@ public class NoteController {
   public ResponseEntity<Void> delete(@PathVariable Long id) {
     noteService.delete(id);
     return ResponseEntity.noContent().build();
+  }
+
+    /** อัปโหลดไฟล์ แล้วผูก URL เข้ากับโน้ต */
+  @PostMapping("/{id}/upload")
+  public ResponseEntity<NoteResponse> uploadForNote(@PathVariable Long id,
+                                                    @RequestParam("file") MultipartFile file) {
+    String url = supabaseStorageService.uploadFile(file);
+    NoteResponse updated = noteService.attachFileUrl(id, url);
+    return ResponseEntity.ok(updated);
   }
 }
