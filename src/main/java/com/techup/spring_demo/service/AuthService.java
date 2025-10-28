@@ -13,7 +13,7 @@ public class AuthService {
 
   private final UserRepository userRepository;
   private final JwtService jwtService;
-  private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+  private final BCryptPasswordEncoder passwordEncoder;
 
   // ✅ สมัครสมาชิกใหม่
   public String register(String email, String password) {

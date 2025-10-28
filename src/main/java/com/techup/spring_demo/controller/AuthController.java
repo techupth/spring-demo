@@ -1,5 +1,6 @@
 package com.techup.spring_demo.controller;
 
+import com.techup.spring_demo.security.JwtService;
 import com.techup.spring_demo.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.Map;
 public class AuthController {
 
   private final AuthService authService;
+  private final JwtService jwtService;
 
   // ✅ Register
   @PostMapping("/register")
@@ -30,7 +32,7 @@ public class AuthController {
   @GetMapping("/me")
   public Map<String, String> me(@RequestHeader("Authorization") String header) {
     String token = header.replace("Bearer ", "");
-    String email = authService.getJwtService().extractEmail(token);
+    String email = jwtService.extractEmail(token);
     return Map.of("email", email);
   }
 }
